@@ -364,7 +364,7 @@ async def start(client, message):
                 if free_granted:
                     left = FREE_FILES_BEFORE_VERIFY - free_used
                     note = (f"🎁 <b>ꜰʀᴇᴇ ꜰɪʟᴇ {free_used}/{FREE_FILES_BEFORE_VERIFY} — ɴᴏ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ɴᴇᴇᴅᴇᴅ!</b>\n"
-                            + (f"<i>{left} ꜰʀᴇᴇ ꜰɪʟᴇ(s) ʟᴇꜰᴛ ᴛᴏᴅᴀʏ ʙᴇꜰᴏʀᴇ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ꜱᴛᴀʀᴛꜱ.</i>" if left > 0
+                            + (f"<i>{left} ꜰʀᴇᴇ ꜰɪʟᴇ(10) ʟᴇꜰᴛ ᴛᴏᴅᴀʏ ʙᴇꜰᴏʀᴇ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ ꜱᴛᴀʀᴛꜱ.</i>" if left > 0
                                else "<i>ɴᴇxᴛ ꜰɪʟᴇ ʀᴇǫᴜɪʀᴇꜱ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ. ꜰʀᴇᴇ ꜰɪʟᴇꜱ ʀᴇꜱᴇᴛ ᴅᴀɪʟʏ (12 AM IST).</i>"))
                     try:
                         free_msg = await m.reply_text(note, parse_mode=enums.ParseMode.HTML)
