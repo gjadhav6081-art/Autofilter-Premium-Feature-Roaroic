@@ -1,6 +1,6 @@
 # ─────────────────────────────────────────────
-# Powered by Roaroic | Developer Channel: @roaroic0
-# https://t.me/roaroic0
+# Powered by Roaroic | Developer Channel: @
+# https://t.me/+gLBpbDa_b5JkMGQ1
 # ─────────────────────────────────────────────
 class script(object):
     START_TXT = """<b>👋 ʜᴇʏ {}, {}</b>
@@ -41,7 +41,7 @@ class script(object):
 🌐 Tɪᴍᴇᴢᴏɴᴇ : <code>Asia/Kolkata</code>
 🛠️ Bᴜɪʟᴅ Sᴛᴀᴛᴜs: <code> v1.4 [ Sᴛᴀʙʟᴇ ]</code>
 
-⚡ Pᴏᴡᴇʀᴇᴅ ʙʏ <a href='https://t.me/+kzUmIPmlJN1jMjc1'>Rᴏᴀʀᴏɪᴄ</a> | @roaroic0
+⚡ Pᴏᴡᴇʀᴇᴅ ʙʏ <a href='https://t.me/+gLBpbDa_b5JkMGQ1'>Rᴏᴀʀᴏɪᴄ</a> | @roaroic0
 </b>"""
 
     CHANNELS = """
@@ -258,7 +258,7 @@ sʜᴏᴡɴ ɪɴ : {remaining_seconds} <i>sᴇᴄ</i>⚡️
     𝙱𝙾𝚃 𝚆𝙾𝚁𝙺𝙸𝙽𝙶 𝙿𝚁𝙾𝙿𝙴𝚁𝙻𝚈....
 
     Powered by Roaroic | Developer Channel: @
-    ᴊᴏɪɴ : https://t.me/+gLBpbDa_b5JkMGQ1
+    ᴊᴏɪɴ : 'https://t.me/+gLBpbDa_b5JkMGQ1'
     """
 
 
@@ -289,7 +289,7 @@ sʜᴏᴡɴ ɪɴ : {remaining_seconds} <i>sᴇᴄ</i>⚡️
 
 ɴᴏᴡ ʏᴏᴜ ᴄᴀɴ ʙᴜʏ ᴏᴜʀ ᴘʀᴇᴍɪᴜᴍ ꜱᴇʀᴠɪᴄᴇ ᴜꜱɪɴɢ ᴛᴇʟᴇɢʀᴀᴍ ꜱᴛᴀʀꜱ.  
 
-ɪꜰ ʏᴏᴜ ꜰᴀᴄᴇ ᴀɴʏ ᴘʀᴏʙʟᴇᴍ, ᴛᴀᴋᴇ ᴀ ꜱᴄʀᴇᴇɴꜱʜᴏᴛ ᴀɴᴅ ꜱᴇɴᴅ ɪᴛ ᴛᴏ - https://t.me/+gLBpbDa_b5JkMGQ1
+ɪꜰ ʏᴏᴜ ꜰᴀᴄᴇ ᴀɴʏ ᴘʀᴏʙʟᴇᴍ, ᴛᴀᴋᴇ ᴀ ꜱᴄʀᴇᴇɴꜱʜᴏᴛ ᴀɴᴅ ꜱᴇɴᴅ ɪᴛ ᴛᴏ - 'https://t.me/+gLBpbDa_b5JkMGQ1'
 
 ꜱᴇʟᴇᴄᴛ ʏᴏᴜʀ ᴅᴇꜱɪʀᴇᴅ ᴀᴍᴏᴜɴᴛ ᴀɴᴅ ᴘᴜʀᴄʜᴀꜱᴇ ᴀ ꜱᴜʙꜱᴄʀɪᴘᴛɪᴏɴ 👇.</b>
 """
