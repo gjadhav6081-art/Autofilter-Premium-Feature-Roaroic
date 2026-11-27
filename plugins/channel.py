@@ -79,11 +79,7 @@ STANDARD_GENRES = {
 CLEAN_PATTERN = re.compile(r'@[^ \n\r\t\.,:;!?()\[\]{}<>\\/"\'=_%]+|\bwww\.[^\s\]\)]+|\([\@^]+\)|\[[\@^]+\]')
 NORMALIZE_PATTERN = re.compile(r"[._]+|[()\[\]{}:;'–!,.?_]")
 QUALITY_PATTERN = re.compile(
-    r"(?<![A-Za-z0-9])(?:ORG|HDCAM|HDTC|CAMRIP|TELESYNC|TS|TC|DVDSCR|DVDRIP|PREDVD|"
-    r"WEBRIP|WEB[- ]?DL|WEBDL|TVRIP|HDTV|BLURAY|BRRIP|BDRIP|HDRIP|REMUX|"
-    r"360P|480P|540P|720P|1080P|1440P|2160P|240P|140P|4K|8K|"
-    r"HEVC|H\s*\.\s*265|H265|X265|H\s*\.\s*264|H264|X264|AV1|"
-    r"8BIT|10BIT|HDR10|HDR|SDR|PROPER|REPACK)(?![A-Za-z0-9])",
+    r"(?<![A-Za-z0-9])(?:2160P|1080P|720P|480P|WEB[- ]?DL|WEBDL)(?![A-Za-z0-9])",
     re.IGNORECASE
 )
 YEAR_PATTERN = re.compile(r"(?<![A-Za-z0-9])(?:19|20)\d{2}(?![A-Za-z0-9])")
@@ -110,22 +106,24 @@ def remove_ignored_words(text: str) -> str:
     return " ".join(word for word in text.split() if word.lower() not in IGNORE_WORDS_LOWER)
 
 def format_quality_label(value: str) -> str:
-    value = str(value).strip()
-    # Keep resolution notation like 1080p/480p, uppercase codec and source labels.
-    if re.fullmatch(r"\d{3,4}p", value, flags=re.IGNORECASE):
-        return value.lower()
-    return value.upper()
+    value = re.sub(r"\s+", "", str(value).strip()).upper()
+    if value in ("WEBDL", "WEB-DL"):
+        return "WEB-DL"
+    return value.lower()
 
 
 def get_qualities(*texts: str) -> str:
-    """Collect every recognized quality/source tag from filename and caption."""
-    formatted = []
+    """Return only approved resolutions and WEB-DL, in descending order."""
+    found = set()
     for text in texts:
         for quality in QUALITY_PATTERN.findall(str(text or "")):
             label = format_quality_label(quality)
-            if label and label not in formatted:
-                formatted.append(label)
-    return ", ".join(formatted) if formatted else "N/A"
+            if label:
+                found.add(label)
+
+    order = ("2160p", "1080p", "720p", "480p", "WEB-DL")
+    result = [label for label in order if label in found]
+    return ", ".join(result) if result else "N/A"
 
 def format_uploaded_duration(seconds):
     """Format the duration reported by Telegram for the actual uploaded media."""
