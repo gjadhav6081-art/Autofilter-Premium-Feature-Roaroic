@@ -32,7 +32,7 @@ IGNORE_WORDS = {
     "horror", "music", "musical", "mystery", "romance", "sci-fi", "sport", 
     "thriller", "war", "western", "hdcam", "hdtc", "camrip", "ts", "tc", 
     "telesync", "dvdscr", "dvdrip", "predvd", "webrip", "web-dl", "tvrip", 
-    "hdtv", "web dl", "webdl", "bluray", "brrip", "bdrip", "360p", "480p", 
+    "hdtv", "hdt", "org", "web dl", "webdl", "bluray", "brrip", "bdrip", "360p", "480p", 
     "720p", "1080p", "2160p", "4k", "1440p", "540p", "240p", "140p", "hevc", 
     "hdrip", "hin", "hindi", "tam", "tamil", "kan", "kannada", "tel", "telugu", 
     "mal", "malayalam", "eng", "english", "pun", "punjabi", "ben", "bengali", 
@@ -79,7 +79,7 @@ STANDARD_GENRES = {
 CLEAN_PATTERN = re.compile(r'@[^ \n\r\t\.,:;!?()\[\]{}<>\\/"\'=_%]+|\bwww\.[^\s\]\)]+|\([\@^]+\)|\[[\@^]+\]')
 NORMALIZE_PATTERN = re.compile(r"[._]+|[()\[\]{}:;'–!,.?_]")
 QUALITY_PATTERN = re.compile(
-    r"(?<![A-Za-z0-9])(?:2160P|1080P|720P|480P|WEB[- ]?DL|WEBDL)(?![A-Za-z0-9])",
+    r"(?<![A-Za-z0-9])(?:2160P|1080P|720P|480P|WEB[- ]?DL|WEBDL|HDT|HEVC|ORG|HDRIP)(?![A-Za-z0-9])",
     re.IGNORECASE
 )
 YEAR_PATTERN = re.compile(r"(?<![A-Za-z0-9])(?:19|20)\d{2}(?![A-Za-z0-9])")
@@ -107,13 +107,15 @@ def remove_ignored_words(text: str) -> str:
 
 def format_quality_label(value: str) -> str:
     value = re.sub(r"\s+", "", str(value).strip()).upper()
-    if value in ("WEBDL", "WEB-DL"):
-        return "WEB-DL"
-    return value.lower()
+    labels = {
+        "WEBDL": "WEB-DL", "WEB-DL": "WEB-DL",
+        "HDT": "HDT", "HEVC": "HEVC", "ORG": "ORG", "HDRIP": "HDRip",
+    }
+    return labels.get(value, value.lower())
 
 
 def get_qualities(*texts: str) -> str:
-    """Return only approved resolutions and WEB-DL, in descending order."""
+    """Return approved resolution, source and encoding labels in a stable order."""
     found = set()
     for text in texts:
         for quality in QUALITY_PATTERN.findall(str(text or "")):
@@ -121,7 +123,7 @@ def get_qualities(*texts: str) -> str:
             if label:
                 found.add(label)
 
-    order = ("2160p", "1080p", "720p", "480p", "WEB-DL")
+    order = ("2160p", "1080p", "720p", "480p", "WEB-DL", "HDT", "HEVC", "ORG", "HDRip")
     result = [label for label in order if label in found]
     return ", ".join(result) if result else "N/A"
 
