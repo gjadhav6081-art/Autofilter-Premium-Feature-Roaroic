@@ -812,7 +812,8 @@ async def verify_movie_post_after_send(bot, base_name):
                 # Never infer OTT availability from an upload filename/caption.
                 ott = "N/A"
 
-                if quality != "N/A" and item.get("quality") != quality:
+                if item.get("quality") != quality:
+                    # Remove legacy codec/bit-depth labels from already-saved records too.
                     item["quality"] = quality
                     changed = True
                 if language != "N/A" and item.get("language") != language:
