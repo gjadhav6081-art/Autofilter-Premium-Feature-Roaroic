@@ -1130,7 +1130,8 @@ def generate_movie_message(movie_doc, base_name):
         match = re.fullmatch(r"(\d{3,4})p", str(label).strip(), re.IGNORECASE)
         if match:
             return (0, -int(match.group(1)), "")
-        return (1, 0, str(label).upper())
+        label_order = {"WEB-DL": 0, "HDT": 1, "HEVC": 2, "ORG": 3, "HDRip": 4}
+        return (1, label_order.get(str(label), 99), str(label).upper())
 
     quality_str = ", ".join(sorted(all_qualities, key=quality_sort_key)) if all_qualities else "N/A"
     language_str = ", ".join(sorted(all_languages)) if all_languages else "N/A"
