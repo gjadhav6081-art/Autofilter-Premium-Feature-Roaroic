@@ -180,9 +180,9 @@ def format_runtime(value):
     return f"{hours}h {minutes}m" if hours and minutes else (f"{hours}h" if hours else f"{minutes}m")
 
 def extract_ott_platform(text: str) -> str:
-    text = text.lower()
-    platforms = {plat for key, plat in OTT_PLATFORMS.items() if key in text}
-    return " | ".join(platforms) if platforms else "N/A"
+    # OTT availability must never be guessed from filenames/captions.
+    # The only trusted source is TMDB's India watch-provider endpoint.
+    return "N/A"
 
 
 def extract_languages(filename: str, caption: str = "") -> str:
@@ -227,7 +227,7 @@ def extract_media_info(filename: str, caption: str):
     tag = "#MOVIE"
     processed_raw = base_raw = filename
     quality = get_qualities(filename, caption_clean)
-    ott_platform = extract_ott_platform(f"{filename} {caption_clean}")
+    ott_platform = "N/A"  # Filled only from verified TMDB India streaming providers.
 
     language = extract_languages(filename, caption_clean)
 
@@ -335,7 +335,7 @@ async def _process_with_lock(bot, filename, caption, media_info, base_name, proc
         "processed": processed,
         "quality": media_info["quality"],
         "language": media_info["language"],
-        "ott_platform": media_info["ott_platform"],
+        "ott_platform": "N/A",
         "timestamp": datetime.now(),
         "tag": media_info["tag"],
         "season": media_info["season"],
@@ -409,7 +409,7 @@ async def _process_with_lock(bot, filename, caption, media_info, base_name, proc
             ),
             "year": media_info["year"] or imdb_details.get("year") or tmdb_details.get("year"),
             "tag": media_info["tag"],
-            "ott_platform": details.get("ott_platform") or media_info["ott_platform"],
+            "ott_platform": tmdb_details.get("ott_platform") or "N/A",
             "online_languages": (
                 details.get("languages")
                 if isinstance(details.get("languages"), str)
@@ -516,9 +516,8 @@ async def _process_with_lock(bot, filename, caption, media_info, base_name, proc
             online_languages = tmdb_details.get("languages") or []
             if online_languages and movie_doc.get("online_languages") in (None, "", "N/A"):
                 updates["online_languages"] = ", ".join(str(item) for item in online_languages)
-            online_ott = tmdb_details.get("ott_platform")
-            if online_ott and movie_doc.get("ott_platform") in (None, "", "N/A"):
-                updates["ott_platform"] = online_ott
+            # Replace any legacy/guessed OTT value with verified India provider data.
+            updates["ott_platform"] = tmdb_details.get("ott_platform") or "N/A"
 
             if imdb_details.get("url"):
                 updates["imdb_url"] = imdb_details["url"]
@@ -812,7 +811,8 @@ async def verify_movie_post_after_send(bot, base_name):
                 caption = str(item.get("caption") or "")
                 quality = get_qualities(filename, caption)
                 language = extract_languages(filename, caption)
-                ott = extract_ott_platform(f"{filename} {caption}")
+                # Never infer OTT availability from an upload filename/caption.
+                ott = "N/A"
 
                 if quality != "N/A" and item.get("quality") != quality:
                     item["quality"] = quality
@@ -820,8 +820,8 @@ async def verify_movie_post_after_send(bot, base_name):
                 if language != "N/A" and item.get("language") != language:
                     item["language"] = language
                     changed = True
-                if ott != "N/A" and item.get("ott_platform") in (None, "", "N/A"):
-                    item["ott_platform"] = ott
+                if item.get("ott_platform") != "N/A":
+                    item["ott_platform"] = "N/A"
                     changed = True
 
             # Prefer the actual uploaded media duration when available.
@@ -833,9 +833,8 @@ async def verify_movie_post_after_send(bot, base_name):
                     movie_doc["runtime"] = runtime
                     changed = True
 
-            missing = any(movie_doc.get(k) in (None, "", "N/A")
-                          for k in ("genres", "rating", "runtime", "ott_platform",
-                                    "online_languages")) or not movie_doc.get("poster_url")
+            # Always re-check OTT so old guessed/stale platform values are removed.
+            missing = True
             if missing:
                 imdb = await get_movie_details(base_name) or {}
                 tmdb = await get_movie_detailsx(base_name) or {}
@@ -861,8 +860,9 @@ async def verify_movie_post_after_send(bot, base_name):
                         formatted = format_runtime(value)
                         if formatted:
                             updates["runtime"] = formatted
-                    elif field == "ott_platform" and movie_doc.get("ott_platform") in (None, "", "N/A"):
-                        updates["ott_platform"] = value
+                    elif field == "ott_platform":
+                        # Only TMDB's India watch-provider result is authoritative.
+                        updates["ott_platform"] = tmdb.get("ott_platform") or "N/A"
                     elif field == "languages" and movie_doc.get("online_languages") in (None, "", "N/A"):
                         updates["online_languages"] = (value if isinstance(value, str)
                                                        else ", ".join(str(v) for v in value))
@@ -1129,9 +1129,8 @@ def generate_movie_message(movie_doc, base_name):
 
     quality_str = ", ".join(sorted(all_qualities, key=quality_sort_key)) if all_qualities else "N/A"
     language_str = ", ".join(sorted(all_languages)) if all_languages else "N/A"
-    ott_str = ", ".join(sorted(all_ott_platforms)) if all_ott_platforms else (
-        movie_doc.get("ott_platform") or "N/A"
-    )
+    # Do not use file-level tags: they are not proof of streaming availability.
+    ott_str = str(movie_doc.get("ott_platform") or "N/A").strip() or "N/A"
     if not all_languages:
         online_languages = movie_doc.get("online_languages")
         if online_languages:
@@ -1289,7 +1288,8 @@ async def refresh_all_movie_metadata(bot, message):
 
                 rating = first_value(imdb_details.get("rating"), tmdb_details.get("rating"), movie_doc.get("rating"))
                 year = first_value(imdb_details.get("year"), tmdb_details.get("year"), movie_doc.get("year"))
-                ott = first_value(tmdb_details.get("ott_platform"), movie_doc.get("ott_platform"))
+                # Clear stale/guessed values when TMDB has no India streaming provider.
+                ott = tmdb_details.get("ott_platform") or "N/A"
                 imdb_id = first_value(imdb_details.get("imdb_id"), tmdb_details.get("imdb_id"))
                 imdb_url = first_value(
                     imdb_details.get("url"),
@@ -1330,7 +1330,7 @@ async def refresh_all_movie_metadata(bot, message):
                     "rating": rating if has_value(rating) else "N/A",
                     "runtime": runtime or old_runtime or "N/A",
                     "year": year,
-                    "ott_platform": ott or "N/A",
+                    "ott_platform": ott,
                     "online_languages": online_languages or movie_doc.get("online_languages") or "N/A",
                     "poster_url": poster_url,
                     "backup_poster_url": first_value(
