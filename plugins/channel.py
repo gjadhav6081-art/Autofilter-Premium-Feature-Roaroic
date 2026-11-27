@@ -844,6 +844,10 @@ async def verify_movie_post_after_send(bot, base_name):
                     tmdb = {}
 
                 updates = {}
+                # Always replace legacy/guessed OTT with the current India provider result.
+                verified_ott = tmdb.get("ott_platform") or "N/A"
+                if movie_doc.get("ott_platform") != verified_ott:
+                    updates["ott_platform"] = verified_ott
                 for field in ("genres", "rating", "runtime", "ott_platform",
                               "languages", "poster_url", "year", "title"):
                     value = imdb.get(field)
